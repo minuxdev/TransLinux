@@ -1,10 +1,11 @@
 from tkinter import *
 from tkinter import ttk
-import os
+import os, platform
 
 
-os.system('xrdb -load /dev/null')
-os.system('xrdb -query')
+if platform.system == 'Linux':
+    os.system('xrdb -load /dev/null')
+    os.system('xrdb -query')
 
 
 class TransGui():
@@ -40,11 +41,9 @@ class TransGui():
         self.scroll_v.config(command=self.list_box.yview)
         self.scroll_h.config(command=self.list_box.xview)
         
-        self.run_btn = Button(self.buttons, text='Run', font='Poppins 9',
-                            width=12)
+        self.run_btn = Button(self.buttons, text='Run', width=12)
 
-        self.cancel_btn = Button(self.buttons, text='Cancel', font='Poppins 9',
-                            width=12)
+        self.cancel_btn = Button(self.buttons, text='Cancel', width=12)
 
 
     def resize_control(self):
@@ -78,7 +77,7 @@ class ProgressBar(Toplevel):
     def __init__(self):
         super().__init__()
         self.title('Copying data')
-        self.geometry('600x150')
+        self.geometry('600x100')
         self.resizable(False, False)
         
         # self.grab_set()
@@ -91,7 +90,7 @@ class ProgressBar(Toplevel):
         self.place_widgets()
 
     def create_frame(self):
-        self.progress = LabelFrame(self, text='Progress Bar')
+        self.progress = Frame(self)
         self.label = Label(self, anchor=CENTER)
     
     
@@ -101,15 +100,15 @@ class ProgressBar(Toplevel):
                                         orient=HORIZONTAL,
                                         length=580, mode='determinate')
         
-        self.file_name = Label(self.label, justify=CENTER, font='Poppins 10')
+        self.file_name = Label(self.label, justify=CENTER, font='monospace')
     
     
     def place_widgets(self):
         self.progress.grid(column=0, row=0, 
-                        sticky='news', padx=4, pady=4)
+                        sticky='news', padx=4, pady=5)
 
         self.label.grid(column=0, row=1, 
-                        sticky='news', padx=4, pady=4)
+                        sticky='news', padx=4, pady=2)
         
         self.prog_bar.grid(column=0, row=0, columnspan=2,
                         sticky='news', padx=4, pady=4)
@@ -122,7 +121,8 @@ if __name__ == "__main__":
     root.title('Transfer')
     root.minsize(500,200)
     app = TransGui(root=root)
-    pg = Progress()
+    pg = ProgressBar()
+    pg.label['text'] = 'aldjfa;lsdjf;lakdjfkalsd,mxcnzv,mcnvoiewfsdaksdfkjasdnfnasm,dnf,'
     root.mainloop()
     
     
