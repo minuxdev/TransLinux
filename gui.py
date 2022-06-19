@@ -3,7 +3,7 @@ from tkinter import ttk
 import os, platform
 
 
-if platform.system == 'Linux':
+if platform.system() == 'Linux':
     os.system('xrdb -load /dev/null')
     os.system('xrdb -query')
 
@@ -36,14 +36,14 @@ class TransGui():
         
         self.list_box = Listbox(self.control, font='Poppins 9',
                         yscrollcommand=self.scroll_v.set,
-                        xscrollcommand=self.scroll_h.set)
+                        xscrollcommand=self.scroll_h.set, selectmode='extended')
         
         self.scroll_v.config(command=self.list_box.yview)
         self.scroll_h.config(command=self.list_box.xview)
         
         self.run_btn = Button(self.buttons, text='Run', width=12)
 
-        self.cancel_btn = Button(self.buttons, text='Cancel', width=12)
+        self.clear_btn = Button(self.buttons, text='Clear', width=12)
 
 
     def resize_control(self):
@@ -69,7 +69,7 @@ class TransGui():
         
         self.run_btn.grid(row=2, column=2, sticky='news',
                         padx=4, pady=4)
-        self.cancel_btn.grid(row=2, column=3, sticky='news',
+        self.clear_btn.grid(row=2, column=3, sticky='news',
                         padx=4, pady=4)
         
 
@@ -95,7 +95,6 @@ class ProgressBar(Toplevel):
     
     
     def create_widgets(self):
-        
         self.prog_bar = ttk.Progressbar(self.progress,
                                         orient=HORIZONTAL,
                                         length=580, mode='determinate')
