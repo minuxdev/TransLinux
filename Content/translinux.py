@@ -90,7 +90,6 @@ def select_multiple(event):
     if '{' in event.data:
         dirs = event.data.replace('{','')
         dirs = dirs.split('} ')
-        
     else:
         dirs = event.data.split(' ')
     
@@ -158,7 +157,6 @@ def filter_path():
 
 def append_to_list_box():
     list_box.delete(0, 'end')
-    print(path_sizes)
     
     for item in file_names:
         index = file_names.index(item)
@@ -182,45 +180,57 @@ def get_destination_path():
 def copy_hendler(dst_path):
     global current_file,start, collected_paths, \
             unique_paths
-    
-    start = True
 
-    for file in unique_paths:
-        name = file.split(r'/')[-1]
-        index = unique_paths.index(file)
+    for item in unique_paths:
+        current_file = item.split(r'/')[-1]
         
-        if not os.path.exists(dst_path+name):
-            if os.path.isdir(file):
-                try:
-                    current_file = name
-                    shutil.copytree(src=str(file).strip(), dst=str(dst_path)+name)
-                except Exception as ex:
-                    print(ex)
-                    continue
-            else:
-                try:
-                    current_file = name
-                    shutil.copy(src=str(file).strip(), dst=(dst_path)+name)
-                except Exception as ex:
-                    print(ex)
-                    continue
-            # required_space -= path_sizes[index]
-            # remaining_bytes += path_sizes[index]
+        if not os.path.exists(dst_path+current_file):
+            start = True
+            start_show_percentage()
+            copy_files(item, dst_path, current_file)
         else:
-            current_file = f'{name} \nAlready exist in destination.'
-            sleep(3)
-
-    print('Done Copying...\n')
+            answer = messagebox.askyesno('File exist', 
+                f'{current_file} \nAlready exists in destination!.\n'+
+                'Do you want to replace?'
+            )
+            
+            if answer:
+                file_path = dst_path+current_file
+                start = True
+                if os.path.isdir(file_path):
+                    shutil.rmtree(file_path, ignore_errors=True)
+                    start_show_percentage()
+                    shutil.copytree(src=item, dst=file_path)
+                else:
+                    os.remove(file_path)
+                    start_show_percentage()
+                    shutil.copy(src=item, dst=file_path)
     reset_program()
+
+
+def copy_files(_file, dst_p, f_name):
+    if os.path.isdir(_file):
+        try:
+            shutil.copytree(src=str(_file).strip(), dst=str(dst_p)+f_name)
+        except Exception as ex:
+            print(ex)
+    else:
+        try:
+            shutil.copy(src=str(_file).strip(), dst=(dst_p)+f_name)
+        except Exception as ex:
+            print(ex)
 
 
 def reset_program(event=None):
     global collected_paths, unique_paths, file_names,\
-        required_space, remaining_bytes, destination_path
-    
+        required_space, remaining_bytes, destination_path, \
+            path_sizes, start
+            
+    start = False
     list_box.delete(0, 'end')    
     collected_paths = []
     unique_paths = []
+    path_sizes = []
     file_names = []
     sh.total_size = 0
     required_space = 0
@@ -240,41 +250,40 @@ def exclude_selcted_files(event):
         except IndexError as ie:
             pass    
         append_to_list_box()
-        
+
 
 def show_percentage():
     global copied_event, current_file, required_space, \
-        remaining_bytes, destination_path
+        remaining_bytes, destination_path, start
     
     p_bar = ProgressBar()
     progress_bar = p_bar.prog_bar
-    label = p_bar.label
-
+    file_name_label = p_bar.file_name
+    show_transfered = p_bar.transfered_bytes
+    show_required = p_bar.remaining_bytes
+    
     print('Started')
     destination_path += r'/' + current_file
+    destination_path = os.path.abspath(destination_path)
     
     while len(unique_paths) != 0:
         if os.path.isdir(destination_path):
-            print("Is dir...")
             percents = (sh.get_size(destination_path) * 100) / required_space
-        else:
-            print("Is file")
-            percents = (sh.size_converter(destination_path) * 100) / required_space
+        elif os.path.isfile(destination_path):
+            percents = os.path.getsize(destination_path) * 100 / required_space
+
         progress_bar['value'] = percents
-        
-        label['text'] = current_file + "\t{:.2f}%".format(percents)
-        sleep(1)
-        
-    print('Finished...')
+        file_name_label['text'] = current_file + "\t{:.2f}%".format(percents)
+        sleep(0.2)
     progress_bar['value'] = 100
-    sleep(0.2)
+    sleep(0.5)
     p_bar.destroy()
 
 
-def start_process():
-    global start, required_space, free_device_space
+def start_copy_process():
+    global required_space, free_device_space
+    
     destination = get_destination_path()
-    print(required_space)
     
     if required_space < free_device_space:    
         if unique_paths:
@@ -283,14 +292,18 @@ def start_process():
             t1.start()
         else:
             messagebox.showwarning("No content", "The listbox is empty!")
-            
-        if start:
-            t2 = Thread(target=show_percentage)
-            t2.daemon = True
-            t2.start()
     else:
         messagebox.showerror('No space', 'No enough space in device,\
             try to delete some files.')
+
+
+def start_show_percentage():
+    global start
+    if start:
+        t2 = Thread(target=show_percentage)
+        t2.daemon = True
+        t2.start()
+        start = False
 
 
 def stop_process():
@@ -302,7 +315,7 @@ list_box.dnd_bind('<<Drop>>', drop_event_handler)
 list_box.bind('<Shift-D>', exclude_selcted_files)
 list_box.bind('<Control-k>', reset_program)
 
-run.config(command=start_process)
+run.config(command=start_copy_process)
 clear.config(command=reset_program)
 
 

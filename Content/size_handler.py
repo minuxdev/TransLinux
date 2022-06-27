@@ -14,13 +14,10 @@ class SizeHandler:
                 for file in os.scandir(directory):
                     if file.is_file():
                         self.total_size += file.stat().st_size
-                        # print(f"{file} ---- Is file --- {_size}")
                     elif file.is_dir():
-                        # print(f"{file} ==== is directory  {gs_size}")
                         self.get_size(file)
             except FileNotFoundError as e:
                 return -1
-            print(f"======>gs size is: {self.total_size}")
             return self.total_size
     
     
@@ -31,7 +28,7 @@ class SizeHandler:
             mega = base ** 2
             giga = base ** 3
             terra = base ** 4
-
+            
             if size < kilo:
                 size = size
                 texto = 'B'

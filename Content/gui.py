@@ -86,7 +86,7 @@ class ProgressBar(Toplevel):
     def __init__(self):
         super().__init__()
         self.title('Copying data')
-        self.geometry('600x100')
+        self.geometry('600x130')
         self.resizable(False, False)
         
         # self.grab_set()
@@ -100,7 +100,7 @@ class ProgressBar(Toplevel):
 
     def create_frame(self):
         self.progress = Frame(self)
-        self.label = Label(self, anchor=CENTER)
+        self.labels = Frame(self)
     
     
     def create_widgets(self):
@@ -108,19 +108,28 @@ class ProgressBar(Toplevel):
                                         orient=HORIZONTAL,
                                         length=580, mode='determinate')
         
-        self.file_name = Label(self.label, justify=CENTER, font='monospace')
+        self.file_name = Label(self.labels, justify=CENTER, anchor=CENTER,
+                                font='Poppins 9')
+        self.transfered_bytes = Label(self.labels, justify=CENTER, 
+                                font='Poppins 9', width=20, text='0,00kb 0.00%')
+        self.remaining_bytes = Label(self.labels, justify=CENTER, 
+                                font='Poppins 9', width=20, text='0,002kb 100.00%')
     
     
     def place_widgets(self):
         self.progress.grid(column=0, row=0, 
                         sticky='news', padx=4, pady=5)
 
-        self.label.grid(column=0, row=1, 
-                        sticky='news', padx=4, pady=2)
+        self.labels.grid(column=0, row=1, 
+                        sticky='news', padx=4, pady=10)
         
         self.prog_bar.grid(column=0, row=0, columnspan=2,
                         sticky='news', padx=4, pady=4)
-        self.file_name.grid(column=0, row=1, columnspan=2,
+        self.file_name.grid(column=0, row=2, columnspan=2,
+                        sticky='news', padx=4, pady=4)
+        self.transfered_bytes.grid(column=0, row=1, columnspan=1,
+                        sticky='news', padx=4, pady=4)
+        self.remaining_bytes.grid(column=2, row=1, columnspan=2,
                         sticky='news', padx=4, pady=4)
 
 
@@ -130,7 +139,7 @@ if __name__ == "__main__":
     root.minsize(500,200)
     app = TransGui(root=root)
     pg = ProgressBar()
-    pg.label['text'] = 'aldjfa;lsdjf;lakdjfkalsd,mxcnzv,mcnvoiewfsdaksdfkjasdnfnasm,dnf,'
+    pg.file_name['text'] = 'Test...'
     root.mainloop()
     
     
