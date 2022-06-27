@@ -262,19 +262,24 @@ def show_percentage():
     show_transfered = p_bar.transfered_bytes
     show_required = p_bar.remaining_bytes
     
-    print('Started')
+    show_required['text'] = sh.size_converter(required_space)
+
     destination_path += r'/' + current_file
     destination_path = os.path.abspath(destination_path)
     
     while len(unique_paths) != 0:
         if os.path.isdir(destination_path):
-            percents = (sh.get_size(destination_path) * 100) / required_space
+            t_bytes = sh.get_size(destination_path)
+            percents =  (t_bytes * 100) / required_space
         elif os.path.isfile(destination_path):
-            percents = os.path.getsize(destination_path) * 100 / required_space
+            t_bytes = os.path.getsize(destination_path)
+            percents = (t_bytes * 100) / required_space
 
         progress_bar['value'] = percents
+        show_transfered['text'] = sh.size_converter(t_bytes)
         file_name_label['text'] = current_file + "\t{:.2f}%".format(percents)
         sleep(0.2)
+        
     progress_bar['value'] = 100
     sleep(0.5)
     p_bar.destroy()

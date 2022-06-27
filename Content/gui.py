@@ -108,11 +108,11 @@ class ProgressBar(Toplevel):
                                         orient=HORIZONTAL,
                                         length=580, mode='determinate')
         
-        self.file_name = Label(self.labels, justify=CENTER, anchor=CENTER,
+        self.file_name = Label(self.labels, justify='left', anchor='center',
                                 font='Poppins 9')
-        self.transfered_bytes = Label(self.labels, justify=CENTER, 
+        self.transfered_bytes = Label(self.labels, justify='left', 
                                 font='Poppins 9', width=20, text='0,00kb 0.00%')
-        self.remaining_bytes = Label(self.labels, justify=CENTER, 
+        self.remaining_bytes = Label(self.labels, justify='right', 
                                 font='Poppins 9', width=20, text='0,002kb 100.00%')
     
     
