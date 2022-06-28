@@ -1,18 +1,14 @@
 #!/bin/bash
 
-echo "Directory: "
-read DIR
+[ ! -z "$1" ] && DIR="$1" || { echo "Directory: " read -r DIR; }
 
-cd "$DIR"; ls
+cd "$DIR";
 
 for file in *;
 do
-newname=`echo "$file" | iconv -t 'ascii//TRANSLIT'`
-
-echo $newname
-
-mv -v "$file" "$newname"
-
-ls $DIR
-
+    newName="$(echo "$file" | iconv -t 'ascii//TRANSLIT')"
+    # echo "$newName"
+    mv -v "$file" "$newName"
 done
+
+printf "Done!"

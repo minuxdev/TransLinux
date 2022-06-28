@@ -130,7 +130,7 @@ def filter_path():
         
         if name.endswith('}'):
             name = name[:-1]
-            
+        
         if path not in unique_paths and path not in unsupported_chars:
             if os.path.isfile(path):
                 file_size = os.path.getsize(path)
@@ -139,7 +139,6 @@ def filter_path():
                     unique_paths.append(path.strip())
                     file_names.append(name)
                     required_space += file_size
-            
             elif os.path.isdir(path):
                 directory_size = sh.get_size(path)
                 
@@ -148,9 +147,20 @@ def filter_path():
                     required_space += directory_size
                     unique_paths.append(path.strip())
                     file_names.append(name)
+            else:
+                if platform.system() == 'Linux':
+                    answer = messagebox.askyesno(
+                        'Encode Error', 'Special characters found in file name!\n'+
+                        'May I correct it for you?')
+                    if answer:
+                        ls = lambda : os.system(f'Content/char_conv.sh {os.path.dirname(path)}')
+                        ls()
+                        messagebox.showinfo('Convert to UTF-8',\
+                            'Process complete. Drag and drop your file again!')
+                        collected_paths.remove(path)
                 else:
                     messagebox.showerror(
-                        'Encode Error', 'Unsupported character in file name!')
+                        'Encode Error', 'Special characters found in file name!')
                     unsupported_chars.append(path)
             show_required_space['text'] = f"Required Space: {sh.size_converter(required_space)}"
 
@@ -262,7 +272,7 @@ def show_percentage():
     show_transfered = p_bar.transfered_bytes
     show_required = p_bar.remaining_bytes
     
-    show_required['text'] = sh.size_converter(required_space)
+    show_required['text'] = f"Total: {sh.size_converter(required_space)}"
 
     destination_path += r'/' + current_file
     destination_path = os.path.abspath(destination_path)
@@ -276,7 +286,7 @@ def show_percentage():
             percents = (t_bytes * 100) / required_space
 
         progress_bar['value'] = percents
-        show_transfered['text'] = sh.size_converter(t_bytes)
+        show_transfered['text'] = f"Transfered: {sh.size_converter(t_bytes)}"
         file_name_label['text'] = current_file + "\t{:.2f}%".format(percents)
         sleep(0.2)
         
@@ -322,6 +332,5 @@ list_box.bind('<Control-k>', reset_program)
 
 run.config(command=start_copy_process)
 clear.config(command=reset_program)
-
 
 root.mainloop()
