@@ -5,6 +5,7 @@ import os, shutil, sys, platform
 from re import U
 from pathlib import Path
 from tkinter import filedialog, messagebox
+from types import NoneType
 from TkinterDnD2 import DND_FILES, TkinterDnD
 from threading import Thread
 from time import sleep
@@ -251,6 +252,7 @@ def reset_program(event=None):
 
 
 def exclude_selcted_files(event):
+    print(event)
     for i in list_box.curselection():
         try:
             unique_paths.pop(i)
@@ -264,7 +266,7 @@ def exclude_selcted_files(event):
 
 def show_percentage():
     global copied_event, current_file, required_space, \
-        remaining_bytes, destination_path, start
+        remaining_bytes, destination_path, start, process
     
     p_bar = ProgressBar()
     progress_bar = p_bar.prog_bar
@@ -277,18 +279,22 @@ def show_percentage():
     destination_path += r'/' + current_file
     destination_path = os.path.abspath(destination_path)
     
-    while len(unique_paths) != 0:
-        if os.path.isdir(destination_path):
-            t_bytes = sh.get_size(destination_path)
-            percents =  (t_bytes * 100) / required_space
-        elif os.path.isfile(destination_path):
-            t_bytes = os.path.getsize(destination_path)
-            percents = (t_bytes * 100) / required_space
+    try:
+        while len(unique_paths) != 0:
+            sh.total_size = 0
+            if os.path.isdir(destination_path):
+                t_bytes = sh.get_size(destination_path)
+                percents =  (t_bytes * 100) / required_space
+            elif os.path.isfile(destination_path):
+                t_bytes = os.path.getsize(destination_path)
+                percents = (t_bytes * 100) / required_space
 
-        progress_bar['value'] = percents
-        show_transfered['text'] = f"Transfered: {sh.size_converter(t_bytes)}"
-        file_name_label['text'] = current_file + "\t{:.2f}%".format(percents)
-        sleep(0.2)
+            progress_bar['value'] = percents
+            show_transfered['text'] = f"Transfered: {sh.size_converter(t_bytes)}"
+            file_name_label['text'] = current_file + "\t{:.2f}%".format(percents)
+            sleep(0.2)
+    except:
+        os._exit(os.EX_OK)
         
     progress_bar['value'] = 100
     sleep(0.5)
@@ -302,9 +308,10 @@ def start_copy_process():
     
     if required_space < free_device_space:    
         if unique_paths:
-            t1 = Thread(target=copy_hendler, args=(destination+r'/',))
-            t1.daemon = True
-            t1.start()
+            process = Thread(target=copy_hendler, 
+                                args=(destination+r'/',), 
+                                daemon=True)
+            process.start()
         else:
             messagebox.showwarning("No content", "The listbox is empty!")
     else:
@@ -314,21 +321,17 @@ def start_copy_process():
 
 def start_show_percentage():
     global start
+    
     if start:
         t2 = Thread(target=show_percentage)
-        t2.daemon = True
         t2.start()
         start = False
-
-
-def stop_process():
-    sys.exit()
 
 
 list_box.drop_target_register(DND_FILES)
 list_box.dnd_bind('<<Drop>>', drop_event_handler)
 list_box.bind('<Shift-D>', exclude_selcted_files)
-list_box.bind('<Control-k>', reset_program)
+list_box.bind('<Control-r>', reset_program)
 
 run.config(command=start_copy_process)
 clear.config(command=reset_program)
